@@ -1,4 +1,8 @@
 ---
+layout: default
+---
+
+---
 Eugene's Data Science Portfolio
 ---
 
