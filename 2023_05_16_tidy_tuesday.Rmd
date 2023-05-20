@@ -1,0 +1,127 @@
+---
+title: "2023 MAY 19 - Tornadoes in the US"
+date: 2023-05-19
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+------------------------------------------------------------------------
+
+The goal of this work is to apply my understanding of data towards real world projects using R and the tidyverse. The data used here is from the TidyTuesday project.
+
+## Check Out This Week's Data
+
+```{r Load , message=FALSE}
+# load R packages for analysis
+library(tidyverse)
+library(tidytuesdayR)
+```
+
+```{r, message=FALSE}
+# Download the weekly data and make available in the tt object.
+# Using the last_tuesday function gives us the latest TidyTuesday data from today's date
+tt <- last_tuesday("2023-05-19")
+```
+
+```{r, message=FALSE}
+# Check out the available data
+tt
+```
+
+This week's data comes from the [Severe Weather Maps, Graphics, and Data Page](https://www.spc.noaa.gov/wcm/#data) of the NOAA's National Weather Service Storm Prediction Center.
+
+The following are the included variables:
+
+| **Variable** | **Class** | **Description**                                                                                                                                                                      |
+|--------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| om           | integer   | Tornado number. Effectively an ID for this tornado in this year.                                                                                                                     |
+| yr           | integer   | Year, 1950-2022.                                                                                                                                                                     |
+| mo           | integer   | Month, 1-12.                                                                                                                                                                         |
+| dy           | integer   | Day of the month, 1-31.                                                                                                                                                              |
+| date         | date      | Date.                                                                                                                                                                                |
+| time         | time      | Time.                                                                                                                                                                                |
+| tz           | character | [Canonical tz database timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).                                                                                      |
+| datetime_utc | datetime  | Date and time normalized to UTC.                                                                                                                                                     |
+| st           | character | Two-letter postal abbreviation for the state (DC = Washington, DC; PR = Puerto Rico; VI = Virgin Islands).                                                                           |
+| stf          | integer   | State FIPS (Federal Information Processing Standards) number.                                                                                                                        |
+| mag          | integer   | Magnitude on the F scale (EF beginning in 2007). Some of these values are estimated (see fc).                                                                                        |
+| inj          | integer   | Number of injuries. When summing for state totals, use sn == 1 (see below).                                                                                                          |
+| fat          | integer   | Number of fatalities. When summing for state totals, use sn == 1 (see below).                                                                                                        |
+| loss         | double    | Estimated property loss information in dollars. Prior to 1996, values were grouped into ranges. The reported number for such years is the maximum of its range.                      |
+| slat         | double    | Starting latitude in decimal degrees.                                                                                                                                                |
+| slon         | double    | Starting longitude in decimal degrees.                                                                                                                                               |
+| elat         | double    | Ending latitude in decimal degrees.                                                                                                                                                  |
+| elon         | double    | Ending longitude in decimal degrees.                                                                                                                                                 |
+| len          | double    | Length in miles.                                                                                                                                                                     |
+| wid          | double    | Width in yards.                                                                                                                                                                      |
+| ns           | integer   | Number of states affected by this tornado. 1, 2, or 3.                                                                                                                               |
+| sn           | integer   | State number for this row. 1 means the row contains the entire track information for this state, 0 means there is at least one more entry for this state for this tornado (om + yr). |
+| f1           | integer   | FIPS code for the 1st county.                                                                                                                                                        |
+| f2           | integer   | FIPS code for the 2nd county.                                                                                                                                                        |
+| f3           | integer   | FIPS code for the 3rd county.                                                                                                                                                        |
+| f4           | integer   | FIPS code for the 4th county.                                                                                                                                                        |
+| fc           | logical   | Was the mag column estimated?                                                                                                                                                        |
+
+## Initial Thoughts and Questions
+
+Based on the variables provided, there are likely a few interesting relationships to explore with regards to recorded tornadoes, including magnitudes, number of states affected, estimated property loss, and number of injuries and fatalities. Furthermore, because climate change is a pressing concern for many, how has the severity of tornadoes changed over the years?
+
+## Data Wrangling and Exploratory Data Analysis
+
+Let's create a series of smaller data frames to explore whether these variables have some sort of relationship that we can further explore
+
+```{r Wrangle}
+#
+df1
+
+#
+df2
+
+#
+df3
+
+#
+df4
+
+#
+df5
+
+```
+
+## Visualize
+
+Using your processed dataset, create your unique visualization.
+
+```{r Visualize}
+#
+
+  
+```
+
+## Save Image
+
+Save your image for sharing. Be sure to use the `#TidyTuesday` hashtag in your post on twitter!
+
+```{r}
+
+# This will save your most recent plot
+ggsave(
+  filename = "My TidyTuesday Plot.png",
+  device = "png")
+
+```
+
+## Future Work
+
+### Hypothesis:
+
+There is a statistically significant
+
+```{r}
+
+```
