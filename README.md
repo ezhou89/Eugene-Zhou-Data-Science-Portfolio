@@ -1,4 +1,4 @@
-# Eugene's Data Science Portfolio
+Eugene's Data Science Portfolio
 
 ---
 layout: default
