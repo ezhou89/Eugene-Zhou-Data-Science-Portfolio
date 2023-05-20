@@ -1,9 +1,7 @@
----
-layout: default
----
+Eugene's Data Science Portfolio
 
 ---
-Eugene's Data Science Portfolio
+layout: default
 ---
 
 Text can be **bold**, _italic_, or ~~strikethrough~~.
