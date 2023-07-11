@@ -1,9 +1,5 @@
 Eugene's Data Science Portfolio
 
----
-layout: default
----
-
 This page is hosted in GitHub Pages and is a collection of my TidyTuesday work using the R programming language and tidyverse. 
 
 
