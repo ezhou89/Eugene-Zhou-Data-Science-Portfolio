@@ -1,5 +1,7 @@
----
 Eugene's Data Science Portfolio
+
+---
+layout:default
 ---
 
 
