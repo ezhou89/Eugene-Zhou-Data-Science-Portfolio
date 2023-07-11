@@ -2,7 +2,7 @@
 layout: page
 ---
 
-## Hey. I'm Eugene and this is my budding Data Science Portfolio
+Hey. I'm Eugene and this is my budding Data Science Portfolio
 
 This page is hosted in GitHub Pages and is a collection of my TidyTuesday work using the R programming language and tidyverse. 
 
