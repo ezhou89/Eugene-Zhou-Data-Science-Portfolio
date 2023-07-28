@@ -4,7 +4,7 @@ layout: page
 
 Hey. I'm Eugene and this is my budding Data Science Portfolio
 
-This page is hosted in GitHub Pages and is a collection of my TidyTuesday work using the R programming language and tidyverse. 
+This page is hosted in GitHub Pages and is a collection of my TidyTuesday work using the R and tidyverse, as well as some SQL and Python exercises. 
 
 
 ### [2023-MAY-16: Horror-Movies-Screencast](./2023-MAY-16---Horror-Movies-Screencast.html)
@@ -14,3 +14,5 @@ This page is hosted in GitHub Pages and is a collection of my TidyTuesday work u
 ### [2023-MAY-23: Squirrels in Central Park](./2023_05_23_tidy_tuesday.html)
 
 ### [2023-MAY-30: Centenarians Around the World](./2023-MAY-30---tidy_tuesday.html)
+
+### [Project: When Was the Golden Age of Video Games?](./Project-%20When%20Was%20the%20Golden%20Age%20of%20Video%20Games%20.html)
