@@ -1,0 +1,549 @@
+---
+title: "Practicing BigQuery, SQL, and R"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
+---
+
+# Purpose
+
+I've recently been learning and practicing SQL, and given the fact that Google BigQuery is such a big deal now, I wanted to find a way to implement practice SQL by pulling from BigQuery's public data sets and then visualizing in R.
+
+Luckily, I found [this tutorial](https://youtu.be/6j27h_17C1Q) on YouTube from John Little that acts as a tutorial/walk-through. We will be querying [JHU's Covid19](https://github.com/CSSEGISandData/COVID-19) public dataset for practice.
+
+```{r}
+# Install packages if not already installed
+#install.packages(c("DBI", "bigrquery"))
+```
+
+## Let's load up the packages.
+
+```{r Load Packages, message=FALSE}
+# load tidymodels and tidyverse packages
+library(tidymodels)
+library(tidyverse)
+
+# bigrquery is a package to access BigQuery via R
+library(bigrquery)
+
+# DBI is a package that interfaces relational databases and R
+library(DBI)
+```
+
+## Establish a database connection
+
+First create a new GCP project in the GCP. The `dbConnect()` argument, `billing`, should have the value of a GCP **project ID**
+
+GPC \> Home \> Dashboard GPC \> BigQuery
+
+```{r}
+con <- dbConnect(
+  bigquery(),
+  project = "bigquery-public-data",
+  dataset = "covid19_jhu_csse",
+  billing = "fleet-furnace-316922"
+)
+con
+```
+
+Now, from **within the R console**, authenticate with GCP
+
+```         
+bigrquery::bq_auth()
+```
+
+## Create a pointer to a Google BQ database table
+
+Here we query the JHU COVID19 data, specifically the summary table available in the BigQuery data (bigquery-public-data.covid19_jhu_csse.summary), where **summary** after the name of the data set denotes the specific table in the relational database. While we receive a warning message about `bigrquery` and `dbplyr` being incompatible, the package and functions appear to still work. Let's try to set `message=FALSE`.
+
+```{r, message=FALSE}
+my_db_pointer <- tbl(con, "summary")
+```
+
+Now we can use [dplyr verbs](https://dplyr.tidyverse.org/) to explore the db table. For example, the `glimpse()` function is fairly similar to the following SQL query:
+
+``` sql
+SELECT *
+FROM bigquery-public-data.covid19_jhu_csse.summary
+LIMIT 10;
+```
+
+We see here that `glimpse()` returns all the variables or fields in the table, as well as the data type.
+
+```{r}
+glimpse(my_db_pointer) 
+```
+
+Here we see that `count()` is the equivalent as the following SQL query to count the lines in the table.
+
+``` sql
+SELECT count(*)
+FROM summary;
+```
+
+```{r}
+count(my_db_pointer) 
+```
+
+## SQL
+
+Using the `DBI` package, we can write SQL queries directly in R. For example, rather than using `glimpse`, we can use the following query.
+
+```{r}
+#DBI::dbGetQuery(con, 
+#"SELECT * 
+#FROM `bigquery-public-data.covid19_jhu_csse.summary`
+#LIMIT 10;")
+```
+
+### Examples of a more complex SQL query
+
+```{r}
+jhu_covid19_nc_counties_10 <- dbGetQuery(con,
+           "SELECT
+              admin2, province_state, confirmed
+            FROM
+              `bigquery-public-data.covid19_jhu_csse.summary` 
+            WHERE 
+              country_region = 'US'
+              AND date = '2020-06-30'
+              AND province_state = 'North Carolina'
+            LIMIT 10;"
+)
+jhu_covid19_nc_counties_10
+```
+
+```{r}
+jhu_covid19_nc_counties <- dbGetQuery(con,
+                                      "SELECT
+                                        admin2, province_state, confirmed
+                                      FROM
+                                        `bigquery-public-data.covid19_jhu_csse.summary`
+                                      WHERE
+                                        country_region = 'US' 
+                                        AND date = '2020-06-30'
+                                        AND province_state = 'North Carolina';")
+
+jhu_covid19_nc_counties
+```
+
+Here, we can see the function `bq_table_fields` provides us with all the fields, as well as their data types.
+
+```{r}
+bigrquery::bq_table_fields("bigquery-public-data.austin_bikeshare.bikeshare_trips")
+```
+
+## Using dplyr and dbplyr
+
+`dplyr` can be used as a way to query data without needing to know SQL. `dbplyr` within the `dplyr` will be used to access data, and does not need to be called separate from the `tidyverse`.
+
+First *connect to a table* using the `tbl()` function. This assumes you have already used `DBI::dbConnect()` to broker the database connection -- as we did above.
+
+```{r}
+covid_data_DBplyr_style <- tbl(con, "summary") 
+```
+
+> Note: `collect()` will run a query that has been assigned to an object.
+
+`collect()` will activate your SQL query and store in local RAM.
+
+``` R
+# running collect on the list assigned to the variable will query the summary table from BigQuery
+
+covid_data_DBplyr_style %>% 
+  collect()   # this will gather all the data from the summary table
+```
+
+Above will pull the entire data table down into local RAM. A better approach is to leverage dplyr. Let dplyr/dbplyr translate queries into SQL and send those to the SQL engine. This allows use to use the RDMBS for summarizing data while using local RAM and CPU for retrieving only the data you want to manipulate.
+
+```{r}
+# we can use dplyr verbs here to clean the data using tidy principles which are then translated into a SQL query
+
+jhu_covid19_DBP_nc_counties <- covid_data_DBplyr_style %>% 
+  filter(province_state == "North Carolina", date == '2020-06-30')  %>% 
+  select(province_state, country_region, date, latitude, 
+         longitude, confirmed, deaths, #location_geom,
+         recovered, active, fips, admin2, combined_key) 
+
+jhu_covid19_DBP_nc_counties 
+```
+
+### show_query()
+
+If you want to see the SQL
+
+```{r}
+jhu_covid19_DBP_nc_counties %>% 
+  show_query()
+```
+
+See Also [Writing SQL with dbplyr](https://dbplyr.tidyverse.org/articles/sql.html)\
+See Also dbplyr \> Articles \> Verb translation\
+See Also dbplyr \> Articles \> Function translation
+
+### Variations
+
+The following are some initial variations using dplyr verbs to create SQL queries, and connect with the RDMBS in a client/server fashion.
+
+```{r}
+glimpse(my_db_pointer)
+
+```
+
+```{r}
+my_search <- my_db_pointer %>% 
+  filter(province_state == "North Carolina", date == '2020-06-30')  %>% 
+  select(province_state, country_region, date, latitude, 
+         longitude, confirmed, deaths, #location_geom,
+         recovered, active, fips, admin2, combined_key)
+```
+
+```{r}
+my_search %>% show_query()
+```
+
+```{r}
+my_search  
+```
+
+```{r}
+# finally stores my_search into local RAM 
+
+my_search %>% 
+  collect()
+```
+
+### Collecting all the data into a local tibble
+
+```{r}
+# let's gather all covid data for Durham, NC as our data set of interest
+# tidy format gets converted to SQL query 
+jhu_covid19_durham_sinceApril <- covid_data_DBplyr_style %>% 
+  filter(province_state == "North Carolina", 
+         admin2 == "Durham",
+         date >= '2020-04-01')  %>% 
+  select(date, confirmed, deaths, recovered, active, 
+         fips, admin2, combined_key) 
+
+my_local_tbl <- jhu_covid19_durham_sinceApril %>% 
+  collect()
+
+my_local_tbl
+```
+
+```{r}
+# arrange conducted at the database as part of the query
+jhu_covid19_durham_sinceApril %>% 
+  arrange(date) 
+
+# arranged at the local level
+my_local_tbl %>% 
+  arrange(date)
+```
+
+### Visualize
+
+Creating visualizations requires 100% of the data. the [dbplot package](https://db.rstudio.com/dbplot) provides helper functions that automate the aggregation and plotting steps. `dbplot` is an alternative visualization approach to assist in the best practices of *transforming* data in the database, then *plotting* in R. Please also see this fuller [discussion on creating visualizations](https://db.rstudio.com/best-practices/visualization/) from databases using R.
+
+```{r}
+# data is cleaned in cloud
+jhu_covid19_durham_sinceApril %>% 
+  arrange(date) %>% 
+  mutate(daily_count = deaths - lag(deaths)) %>% 
+  filter(daily_count > -1) %>% 
+  mutate(scare = case_when(
+    daily_count >= 2 ~ "high",
+    daily_count == 1 ~ "medium",
+    daily_count == 0 ~ "low"
+  )) %>% 
+# piped into ggplot at the local level  
+  ggplot(aes(date, daily_count, "low", "medium")) +
+  geom_jitter(aes(color = fct_relevel(scare, "low", "medium"))) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_smooth(color = "red", se = FALSE) +
+  scale_color_manual(values = c("forestgreen", "goldenrod", "firebrick")) +
+  ylim(0, 5) +
+  guides(color = FALSE) +
+  labs(title = "Covid Deaths", subtitle = "daily count",
+       y = "", x = "") +
+  theme_classic()
+```
+
+```{r}
+jhu_covid19_durham_sinceApril %>% 
+  arrange(date) %>% 
+  mutate(daily_count = confirmed - lag(confirmed)) %>% 
+  mutate(scare = case_when(
+    daily_count > 59 ~ "extreme",
+    daily_count <= 59 & daily_count > 36  ~ "high",
+    daily_count <= 36 & daily_count > 19 ~ "medium",
+    daily_count <= 19 ~ "low"
+  )) %>% 
+  ggplot(aes(date, daily_count, "low", "medium")) +
+  geom_point(aes(color = fct_relevel(scare, "low", "medium", "high", "extreme"))) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_smooth(color = "red", se = FALSE) +
+  scale_color_manual(values = c("forestgreen", "goldenrod", "darkorange", "firebrick")) +
+  scale_x_date(breaks = "1 month", date_labels = "%b") +
+  guides(color = FALSE) +
+  labs(title = "COVID19 Cases in Durham County, NC", 
+       x = "", y = "daily county",
+       caption = "Source: JHU dataset") +
+  theme_classic()
+```
+
+```{r}
+jhu_covid19_DBP_nc_counties %>% 
+  select(admin2, fips, province_state, confirmed, deaths) %>% 
+  rename(county = admin2, state = province_state, cases = confirmed) %>% 
+  arrange(-deaths)
+```
+
+## SQL -- MORE
+
+Here we can use the connection created at the top to run an SQL query in an RMarkdown code chunk
+
+```{sql connection=con, output.var = "special_df"}
+# this code chunk is saved as special_df
+
+SELECT `province_state`, `country_region`, `date`, 
+       `latitude`, `longitude`, `confirmed`, `deaths`, 
+       `recovered`, `active`, `fips`, `admin2`, `combined_key`
+FROM `summary`
+WHERE ((`province_state` = 'North Carolina') AND (`date` = '2020-06-30'))
+```
+
+Above code chunk created the tibble `special_df` as identified in output.var
+
+```{r}
+special_df %>% 
+  ggplot(aes(confirmed, deaths)) +
+  geom_jitter() +
+  geom_text(data = . %>% filter(deaths > 100), 
+            aes(confirmed, deaths, label = admin2, hjust = 1.15))
+```
+
+## Example 2a: DBplyr and Austin Bikeshare trips
+
+Make the connection to the `bigquery-public-data.austin_bikeshare` database.
+
+```{r}
+con2_bq_bikes <- dbConnect(
+  bigrquery::bigquery(),
+  project = "bigquery-public-data",
+  dataset = "austin_bikeshare",
+  billing = "fleet-furnace-316922"
+)
+con2_bq_bikes
+```
+
+Set the query pointer to `bigquery-public-data.austin_bikeshare.bikeshare_trips` table.
+
+```{r}
+bikeshare_trips <- tbl(con2_bq_bikes, "bikeshare_trips") 
+```
+
+```{r}
+austin_bikeshare_all <- bikeshare_trips %>% 
+  mutate(trip_id = as.double(trip_id)) %>% 
+  collect()
+```
+
+```{r}
+austin_bikeshare_all
+```
+
+```{r}
+glimpse(austin_bikeshare_all)
+```
+
+### Visualize
+
+[How far is too far to bike to work?](https://mobilitylab.org/2017/02/27/how-far-bike-work/)
+
+```{r}
+austin_bikeshare_all %>% 
+  drop_na(subscriber_type) %>% 
+  filter(duration_minutes < 100) %>%
+  mutate(travel_type = case_when(
+    duration_minutes <= 10 ~ "Commuter",
+    duration_minutes >  10 ~ "Tourist"
+  )) %>% 
+  ggplot(aes(duration_minutes, fct_reorder(fct_lump(subscriber_type, prop = 0.01), duration_minutes))) +
+  geom_boxplot(aes(fill = travel_type)) +
+  geom_vline(xintercept = 10, linetype = "dashed", color = "grey60") +
+  scale_x_log10() +
+  labs(title = "Bike Share Trip times", 
+       subtitle = "Austin BikeShare Program",
+       y = "Type of bike rental pass",
+       x = "Duration of ride in minutes",
+       caption = "Source: Public datasets > Google BigQuery > Austin Bikeshare Trips",
+       fill = "") 
+```
+
+```{r}
+summary(austin_bikeshare_all)
+```
+
+## Example 2b: Austin BikeShare
+
+List the top 5 percent of locations (stations) where bike-share trips begin and end.
+
+Then, use `left_join()` to affect a database SQL join or table merge.
+
+```{r}
+left_tbl <- bikeshare_trips %>% 
+  count(start_station_name) %>% 
+  slice_max(order_by = n, prop = .05)
+left_tbl
+
+right_tbl <- bikeshare_trips %>% 
+  count(end_station_name) %>% 
+  slice_max(order_by = n, prop = .05)
+right_tbl
+
+left_join(left_tbl, right_tbl, by = c("start_station_name" = "end_station_name")) # %>% show_query()
+```
+
+## Example 3: NYC tree census
+
+Inspired by [Edgar Ruiz's dbplyr presentation](https://rstudio.com/resources/rstudioconf-2019/databases-using-r-the-latest/)
+
+[DBplot](https://db.rstudio.com/dbplot/) leverages dplyr to process the calculations of a plot inside a database.
+
+```{r}
+con_ny_trees <- dbConnect(
+  bigrquery::bigquery(),
+  project = "bigquery-public-data",
+  dataset = "new_york_trees",
+  billing = "fleet-furnace-316922"
+)
+con_ny_trees
+```
+
+Set the query pointer to `bigquery-public-data.ustin_bikeshare.bikesahre_trips` table
+
+```{r}
+nytrees <- tbl(con_ny_trees, "tree_census_2015") 
+```
+
+### Visualize
+
+```{r}
+library(dbplot)
+library(leaflet)
+```
+
+```{r}
+glimpse(nytrees)
+nytrees %>% 
+  count(curb_loc)
+```
+
+#### dbplot_raster()
+
+Above, we **subset the data at the database** to *good and healthy trees*, *offset from the curb*. Now use the `dbpot_raster()` function to **plot in R**
+
+```{r}
+locations <- nytrees %>% 
+  filter(curb_loc == "OffsetFromCurb") %>% 
+  filter(health == "Good") %>% 
+  dbplot_raster(longitude, latitude, resolution = 30)
+  # db_compute_raster(longitude, latitude, resolution = 30)
+locations
+```
+
+#### db_compute_raster()
+
+```{r}
+nytrees %>% 
+  filter(curb_loc == "OffsetFromCurb") %>% 
+  filter(health == "Good") %>% 
+  count()
+
+locations_tbl <- nytrees %>% 
+  filter(curb_loc == "OffsetFromCurb") %>% 
+  filter(health == "Good") %>% 
+  db_compute_raster(longitude, latitude, resolution = 30)
+locations_tbl
+```
+
+#### Tidy evaluation functions
+
+Tidy eval function [by Ruiz (timestamp 13:47)](https://rstudio.com/resources/rstudioconf-2019/databases-using-r-the-latest/)
+
+```{r}
+size <- function(df, field) {
+  field <- enquo(field)
+  df %>% 
+    arrange(!! field) %>% 
+    mutate(diff = !! field - lag(!! field)) %>% 
+    filter(diff > 0) %>% 
+    summarise(min(diff)) %>% 
+    pull()
+}
+```
+
+```{r}
+lon_size <- locations_tbl %>% 
+  size(longitude)
+
+lon_size
+
+lat_size <- locations_tbl %>% 
+  size(latitude)
+
+lat_size
+```
+
+```{r}
+sq <- locations_tbl %>% 
+  mutate(lon1 = longitude,
+         lon2 = longitude + lon_size,
+         lat1 = latitude,
+         lat2 = latitude + lat_size,
+         of_max = `n()` / max(`n()`)
+  )
+```
+
+#### Leaflet map
+
+```{r}
+leaflet() %>% 
+  addTiles() %>% 
+  addRectangles(
+    sq$lon1, sq$lat1, sq$lon2, sq$lat2
+  )
+```
+
+```{r}
+fancy <- leaflet() %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addRectangles(
+    sq$lon1, sq$lat1, sq$lon2, sq$lat2,
+    fillOpacity = sq$of_max,
+    fillColor = "forestgreen",
+    stroke = FALSE,
+    popup = glue::glue('Trees {sq$`n()`}')
+  )
+
+fancy
+```
+
+```{r}
+library(mapview)
+
+mapshot(fancy, file = "images/tree_cover.png")
+```
+
+## Resources
+
+-   [Databases using R](https://db.rstudio.com/)
+-   [library(DBI)](https://dbi.r-dbi.org/reference/)
+-   [library(bigrquery)](https://bigrquery.r-dbi.org/)
+-   [library(dbplyr)](https://dbplyr.tidyverse.org/)
+-   [RStudio Conf 2019, 15 min. Recording](https://rstudio.com/resources/rstudioconf-2019/databases-using-r-the-latest/)
