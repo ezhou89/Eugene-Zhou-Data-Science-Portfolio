@@ -208,7 +208,7 @@ df1 %>%
        title = "More Squirrels Observed in the PM")
 ```
 
-<img src="/post/2023-05-23-TidyTuesday/2023-MAY-23---tidy_tuesday_files/figure-html/Plot DF1-1.png" width="672" />
+<img src="/post/2023-05-23-TidyTuesday/2023 MAY 23 - tidy_tuesday_files/figure-html/Plot DF1-1.png" width="672" />
 
 
 
@@ -235,7 +235,7 @@ df2 %>%
   geom_col()
 ```
 
-<img src="/post/2023-05-23-TidyTuesday/2023-MAY-23---tidy_tuesday_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+<img src="/post/2023-05-23-TidyTuesday/2023 MAY 23 - tidy_tuesday_files/figure-html/unnamed-chunk-4-1.png" width="672" />
 
 It appears that we have so mand `NA`'s because a squirrel cannot be doing some of these activities simultaneously.\
 
