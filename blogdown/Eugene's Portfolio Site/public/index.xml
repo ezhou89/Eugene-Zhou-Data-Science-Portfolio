@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>A Hugo website</title>
+    <link>https://eugenezhou.netlify.app/</link>
+    <description>Recent content on A Hugo website</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Tue, 15 Aug 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://eugenezhou.netlify.app/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>2023 August 15 - Spam Email</title>
+      <link>https://eugenezhou.netlify.app/2023/08/15/2023-august-15-spam-email/</link>
+      <pubDate>Tue, 15 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://eugenezhou.netlify.app/2023/08/15/2023-august-15-spam-email/</guid>
+      <description>The goal of this work is to apply my understanding of data towards real world projects using R and the tidyverse. The data used here is from the TidyTuesday project.
+Check Out This Week&amp;rsquo;s Data # load R packages for analysis library(tidyverse) library(tidytuesdayR) # Download the weekly data and make available in the tt object. # Using the last_tuesday function gives us the latest TidyTuesday data from today&#39;s date tues &amp;lt;- last_tuesday(&amp;quot;2023-08-15&amp;quot;) tt &amp;lt;- tt_load(tues) ## ## Downloading file 1 of 1: `spam.</description>
+    </item>
+    
+    <item>
+      <title>Practicing BigQuery, SQL, and R</title>
+      <link>https://eugenezhou.netlify.app/2023/08/15/practicing-bigquery-sql-and-r/</link>
+      <pubDate>Tue, 15 Aug 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://eugenezhou.netlify.app/2023/08/15/practicing-bigquery-sql-and-r/</guid>
+      <description>Purpose I’ve recently been learning and practicing SQL, and given the fact that Google BigQuery is such a big deal now, I wanted to find a way to implement practice SQL by pulling from BigQuery’s public data sets and then visualizing in R.
+Luckily, I found this tutorial on YouTube from John Little that acts as a tutorial/walk-through. We will be querying JHU’s Covid19 public dataset for practice.
+# Install packages if not already installed #install.</description>
+    </item>
+    
+    <item>
+      <title>2023 MAY 23 - Squirrels in Central Park</title>
+      <link>https://eugenezhou.netlify.app/2023/05/23/2023-may-23-squirrels-in-central-park/</link>
+      <pubDate>Tue, 23 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://eugenezhou.netlify.app/2023/05/23/2023-may-23-squirrels-in-central-park/</guid>
+      <description>The goal of this work is to apply my understanding of data towards real world projects using R and the tidyverse. The data used here is from the TidyTuesday project.
+Check Out This Week&amp;rsquo;s Data # load R packages for analysis library(tidyverse) library(tidytuesdayR) # Download the weekly data and make available in the tt object. # Using the last_tuesday function gives us the latest TidyTuesday data from today&#39;s date tues &amp;lt;- last_tuesday(&amp;quot;2023-5-23&amp;quot;) tt &amp;lt;- tt_load(tues) ## ## Downloading file 1 of 1: `squirrel_data.</description>
+    </item>
+    
+    <item>
+      <title>TidyModels Screencast - Horror Movie Descriptions</title>
+      <link>https://eugenezhou.netlify.app/2023/05/16/tidymodels-screencast-horror-movie-descriptions/</link>
+      <pubDate>Tue, 16 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://eugenezhou.netlify.app/2023/05/16/tidymodels-screencast-horror-movie-descriptions/</guid>
+      <description>Purpose This document is an adaptation of the “Use OpenAI text embeddings for horror movie descriptions” by Julia Silge.
+The goal is to apply my training in R towards real world projects, including the use of OpenAI towards a data science project. The data used here is from the TidyTuesday project.
+#load r packages library(tidytuesdayR) library(tidymodels) library(httr) Data Exploration #get horror movie data from GitHub using tidytuesdayR package tuesdata &amp;lt;- tt_load(&amp;quot;2022-11-01&amp;quot;) horror_movies &amp;lt;- tuesdata$horror_movies #create a sample of the horror movie data by filtering movies that are in the English language and remove movies that do not have an overview #use slice sample to randomly select rows set.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://eugenezhou.netlify.app/about/</link>
+      <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
+      
+      <guid>https://eugenezhou.netlify.app/about/</guid>
+      <description>This is my data science portfolio website using the blogdown package.</description>
+    </item>
+    
+  </channel>
+</rss>

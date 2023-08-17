@@ -1,0 +1,172 @@
+---
+title: "2023 MAY 23 - Squirrels in Central Park"
+date: 2023-05-23
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+------------------------------------------------------------------------
+
+The goal of this work is to apply my understanding of data towards real world projects using R and the tidyverse. The data used here is from the TidyTuesday project.
+
+## Check Out This Week's Data
+
+```{r Load , message=FALSE}
+# load R packages for analysis
+library(tidyverse)
+library(tidytuesdayR)
+```
+
+```{r, message=FALSE}
+# Download the weekly data and make available in the tt object.
+# Using the last_tuesday function gives us the latest TidyTuesday data from today's date
+
+tues <- last_tuesday("2023-5-23")
+
+tt <- tt_load(tues)
+```
+
+```{r, message=FALSE}
+# Check out the available data
+tt
+```
+
+The data this week comes from the [2018 Central Park Squirrel Census](https://data.cityofnewyork.us/Environment/2018-Central-Park-Squirrel-Census-Squirrel-Data/vfnx-vebw). [The Squirrel Census](https://www.thesquirrelcensus.com/) is a multimedia science, design, and storytelling project focusing on the Eastern gray (Sciurus carolinensis). They count squirrels and present their findings to the public. The dataset contains squirrel data for each of the 3,023 sightings, including location coordinates, age, primary and secondary fur color, elevation, activities, communications, and interactions between squirrels and with humans.\
+\
+\
+The following are the included variables:
+
+| **Variable**                               | **Class** | **Description**                                                                                                                                                                                                                          |
+|------------------|------------------|------------------------------------|
+| X                                          | double    | Longitude coordinate for squirrel sighting point                                                                                                                                                                                         |
+| Y                                          | double    | Latitude coordinate for squirrel sighting point                                                                                                                                                                                          |
+| Unique Squirrel ID                         | character | Identification tag for each squirrel sightings. The tag is comprised of `Hectare ID` + `Shift` + `Date` + `Hectare Squirrel Number.`                                                                                                     |
+| Hectare                                    | character | ID tag, which is derived from the hectare grid used to divide and count the park area. One axis that runs predominantly north-to-south is numerical (1-42), and the axis that runs predominantly east-to-west is roman characters (A-I). |
+| Shift                                      | character | Value is either `AM` or `PM,` to communicate whether or not the sighting session occurred in the morning or late afternoon.                                                                                                              |
+| Date                                       | double    | Concatenation of the sighting session day and month.                                                                                                                                                                                     |
+| Hectare Squirrel Number                    | double    | Number within the chronological sequence of squirrel sightings for a discrete sighting session.                                                                                                                                          |
+| Age                                        | character | Value is either `Adult` or `Juvenile.`                                                                                                                                                                                                   |
+| Primary Fur Color                          | character | Primary Fur Color - value is either `Gray`, `Cinnamon` or `Black`.                                                                                                                                                                       |
+| Highlight Fur Color                        | character | Discrete value or string values comprised of `Gray`, `Cinnamon` or `Black`.                                                                                                                                                              |
+| Combination of Primary and Highlight Color | character | A combination of the previous two columns; this column gives the total permutations of primary and highlight colors observed.                                                                                                            |
+| Color notes                                | character | Sighters occasionally added commentary on the squirrel fur conditions. These notes are provided here.                                                                                                                                    |
+| Location                                   | character | Value is either `Ground Plane` or `Above Ground`. Sighters were instructed to indicate the location of where the squirrel was when first sighted.                                                                                        |
+| Above Ground Sighter Measurement           | character | For squirrel sightings on the ground plane, fields were populated with a value of `FALSE`.                                                                                                                                               |
+| Specific Location                          | character | Sighters occasionally added commentary on the squirrel location. These notes are provided here.                                                                                                                                          |
+| Running                                    | logical   | Squirrel was seen running.                                                                                                                                                                                                               |
+| Chasing                                    | logical   | Squirrel was seen chasing another squirrel.                                                                                                                                                                                              |
+| Climbing                                   | logical   | Squirrel was seen climbing a tree or other environmental landmark.                                                                                                                                                                       |
+| Eating                                     | logical   | Squirrel was seen eating.                                                                                                                                                                                                                |
+| Foraging                                   | logical   | Squirrel was seen foraging for food.                                                                                                                                                                                                     |
+| Other Activities                           | character | Other activities squirrels were observed doing.                                                                                                                                                                                          |
+| Kuks                                       | logical   | Squirrel was heard kukking, a chirpy vocal communication used for a variety of reasons.                                                                                                                                                  |
+| Quaas                                      | logical   | Squirrel was heard quaaing, an elongated vocal communication which can indicate the presence of a ground predator such as a dog.                                                                                                         |
+| Moans                                      | logical   | Squirrel was heard moaning, a high-pitched vocal communication which can indicate the presence of an air predator such as a hawk.                                                                                                        |
+| Tail flags                                 | logical   | Squirrel was seen flagging its tail. Flagging is a whipping motion used to exaggerate squirrel's size and confuse rivals or predators. Looks as if the squirrel is scribbling with tail into the air.                                    |
+| Tail twitches                              | logical   | Squirrel was seen twitching its tail. Looks like a wave running through the tail, like a breakdancer doing the arm wave. Often used to communicate interest, curiosity.                                                                  |
+| Approaches                                 | logical   | Squirrel was seen approaching human, seeking food.                                                                                                                                                                                       |
+| Indifferent                                | logical   | Squirrel was indifferent to human presence.                                                                                                                                                                                              |
+| Runs from                                  | logical   | Squirrel was seen running from humans, seeing them as a threat.                                                                                                                                                                          |
+| Other Interactions                         | character | Sighter notes on other types of interactions between squirrels and humans.                                                                                                                                                               |
+| Lat/Long                                   | character | Latitude and longitude                                                                                                                                                                                                                   |
+
+## Initial Thoughts and Questions
+
+Based on the variables provided, there are likely a few interesting relationships to explore with regards to the 3,023 recorded squirrel sightings, including `location`, `date`, `activity`, and `shift`.
+
+-   Are more squirrels observed during the AM or PM?
+
+-   What kind of activities are the squirrels engaging in?
+
+## Data Wrangling and Exploratory Data Analysis
+
+Let's create a series of smaller data frames to explore whether these variables have some sort of relationship that we can further explore
+
+```{r Extract}
+# Extract squirrel data from tt 
+squirrel <- tt$squirrel_data
+
+squirrel %>% skimr::skim()
+```
+
+```{r Data Frame 1}
+# Create a new data frame to explore observed squirrels depending on time of day and age
+
+df1 <- squirrel %>%
+  select(`Shift`, `Hectare Squirrel Number`, `Age`)
+
+df1 %>% 
+  group_by(Shift, Age) %>%
+  summarise(`# Observed` = n(), 
+            `Min Squirrels per Hectare` = min(`Hectare Squirrel Number`), 
+            `Max Squirrels per Hectare` = max(`Hectare Squirrel Number`), 
+            .groups = "keep")
+```
+
+```{r Plot DF1}
+
+df1 %>% 
+  group_by(Shift, Age) %>%
+  summarise(`# Observed` = n(), 
+            .groups = "keep") %>% 
+  ggplot(aes(x = `Shift`, y = `# Observed`, fill = `Age`)) + 
+  geom_col(position = "dodge") +
+  labs(x = "Shift (AM/PM)", 
+       y = "# of Squirrels Observed", 
+       title = "More Squirrels Observed in the PM")
+```
+
+```{r, echo=FALSE, include=FALSE}
+
+image <- df1 %>% 
+  group_by(Shift, Age) %>%
+  summarise(`# Observed` = n(), 
+            .groups = "keep") %>% 
+  ggplot(aes(x = `Shift`, y = `# Observed`, fill = `Age`)) + 
+  geom_col(position = "dodge") +
+  labs(x = "Shift (AM/PM)", 
+       y = "# of Squirrels Observed", 
+       title = "More Squirrels Observed in the PM")
+```
+
+Let's see what happens to the squirrel data frame if we drop the `NA`'s.
+
+```{r DF1 Clean}
+df2 <- squirrel %>% 
+  drop_na()
+
+```
+
+Only 1 row of data remains, indicating at least one observation is missing in each variable across nearly every single squirrel sighted, suggesting dropping `NA`'s immediately is not a good choice for our data set.\
+
+```{r}
+df2 <- squirrel %>% 
+  select(Running, Chasing, Climbing, Eating, Foraging) %>%
+  gather(key = "Activity", value = "Observed") %>%
+  group_by(Activity) %>%
+  count(Observed)
+
+df2 %>%
+  ggplot(aes(x = Activity, y = n, fill = Observed)) + 
+  geom_col()
+```
+
+It appears that we have so mand `NA`'s because a squirrel cannot be doing some of these activities simultaneously.\
+
+```{r, echo=FALSE, include=FALSE, message=FALSE}
+# Save image
+# This will save your most recent plot
+image %>% ggsave(
+  filename = "squirrels.png",
+  device = "png")
+
+```
+
+## Future Work
+
+1.  TBD

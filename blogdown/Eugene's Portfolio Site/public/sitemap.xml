@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://eugenezhou.netlify.app/2023/08/15/2023-august-15-spam-email/</loc>
+    <lastmod>2023-08-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://eugenezhou.netlify.app/</loc>
+    <lastmod>2023-08-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://eugenezhou.netlify.app/post/</loc>
+    <lastmod>2023-08-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://eugenezhou.netlify.app/2023/08/15/practicing-bigquery-sql-and-r/</loc>
+    <lastmod>2023-08-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://eugenezhou.netlify.app/2023/05/23/2023-may-23-squirrels-in-central-park/</loc>
+    <lastmod>2023-05-23T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://eugenezhou.netlify.app/2023/05/16/tidymodels-screencast-horror-movie-descriptions/</loc>
+    <lastmod>2023-05-16T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://eugenezhou.netlify.app/about/</loc>
+    <lastmod>2016-05-05T21:48:51-07:00</lastmod>
+  </url><url>
+    <loc>https://eugenezhou.netlify.app/categories/</loc>
+  </url><url>
+    <loc>https://eugenezhou.netlify.app/tags/</loc>
+  </url>
+</urlset>

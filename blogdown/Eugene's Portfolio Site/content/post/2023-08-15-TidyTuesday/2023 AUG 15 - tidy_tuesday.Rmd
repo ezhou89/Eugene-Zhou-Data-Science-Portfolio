@@ -1,0 +1,147 @@
+---
+title: "2023 August 15 - Spam Email"
+date: 2023-08-15
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+------------------------------------------------------------------------
+
+The goal of this work is to apply my understanding of data towards real world projects using R and the tidyverse. The data used here is from the TidyTuesday project.
+
+# Check Out This Week's Data
+
+```{r Load Packages, message=FALSE}
+# load R packages for analysis
+library(tidyverse)
+library(tidytuesdayR)
+```
+
+```{r Get Data, message=FALSE}
+# Download the weekly data and make available in the tt object.
+# Using the last_tuesday function gives us the latest TidyTuesday data from today's date
+
+tues <- last_tuesday("2023-08-15")
+
+tt <- tt_load(tues)
+```
+
+```{r Review Data, message=FALSE}
+# Check out the available data
+tt
+```
+
+The data this week comes from Vincent Arel-Bundock's Rdatasets package(<https://vincentarelbundock.github.io/Rdatasets/index.html>).
+
+> Rdatasets is a collection of 2246 datasets which were originally distributed alongside the statistical software environment R and some of its add-on packages. The goal is to make these data more broadly accessible for teaching and statistical software development.
+
+We're working with the [spam email](https://vincentarelbundock.github.io/Rdatasets/doc/DAAG/spam7.html) dataset. This is a subset of the [spam e-mail database](https://search.r-project.org/CRAN/refmans/kernlab/html/spam.html).
+
+This is a dataset collected at Hewlett-Packard Labs by Mark Hopkins, Erik Reeber, George Forman, and Jaap Suermondt and shared with the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/94/spambase). The dataset classifies 4601 e-mails as spam or non-spam, with additional variables indicating the frequency of certain words and characters in the e-mail.
+
+## The following are the included variables:
+
+| **Variable** | **Class** | **Description**                                                          |
+|--------------------|------------------|----------------------------------|
+| crl.tot      | double    | Total length of uninterrupted sequences of capitals                      |
+| dollar       | double    | Occurrences of the dollar sign, as percent of total number of characters |
+| bang         | double    | Occurrences of \'!\', as percent of total number of characters           |
+| money        | double    | Occurrences of \'money\', as percent of total number of characters       |
+| n000         | double    | Occurrences of the string \'000\', as percent of total number of words   |
+| make         | double    | Occurrences of \'make\', as a percent of total number of words           |
+| yesno        | character | Outcome variable, a factor with levels 'n' not spam, 'y' spam            |
+
+# Initial Thoughts and Questions
+
+Based on the context of this data set and variables provided, we understand that it was probably used to teach classification algorithms to recognize spam email:
+
+-   Do the oldest individuals on the planet were living in the same general location or country?
+
+-   Who tends to live longer? Men or Women?
+
+From what I've previously heard regarding age statistics, Japan tends to have the longest life expectancy and women tend to live longer than men, so let's explore if that's still the case.
+
+# Data Wrangling and Exploratory Data Analysis
+
+## Extract the data
+
+Luckily, the spam data set only contains one data frame, so we don't need to create some table joins. We can just extract the data frame to explore the variables.
+
+```{r Extract Data}
+# Extract data from tt 
+spam <- tt$spam
+
+spam %>% glimpse()
+```
+
+### How many spam emails do we have vs not spam?
+
+It looks like we have a 40/60 split of spam and not spam emails in this data, as seen below.
+
+```{r Spam/Not Spam}
+# Group data by gender and count via summarize
+spam %>%
+  group_by(yesno) %>%
+  summarise(n())
+```
+
+### Let's try to gather the variables
+
+```{r Gather Variables}
+spam2 <- spam %>%
+  gather(key = "variable", value = "value", -yesno)
+spam2
+```
+
+```{r Plot Data}
+ggplot(spam2, 
+       aes(x = yesno, y = value, fill = yesno)) + 
+  geom_boxplot(notch = TRUE) + 
+  scale_y_log10() + 
+  facet_wrap(vars(variable), scales = "free") + 
+  coord_flip() + 
+  labs(title = "Email Words and Spam", y = "Percentages", x = "Classification") + 
+  theme(legend.position = "none")
+```
+
+### Let's replace "y" and "n" with 1 and 0 to see if we can set up a model using Log Regression
+
+Let's use `str_replace` to convert the "y" and "n" text to "0" and "1". Since the converted `yesno` variable is still a string, let's use `as.numeric` to convert the column to a numeric.
+
+```{r Y N Convert}
+spam$yesno <- str_replace(string = spam$yesno, pattern = "n", replacement = "0")
+spam$yesno <- str_replace(string = spam$yesno, pattern = "y", replacement = "1")
+spam$yesno <- spam$yesno %>% as.numeric()
+```
+
+Let's keep `crl.tot` separate from the other variables since the values don't appear to be recorded as percentages.
+
+```{r Rearrange Data}
+spam3 <- spam %>%
+  gather(key = "variable", value = "value", -yesno, -crl.tot)
+spam3
+```
+
+### Let's try to create a Logistic Regression Model
+
+```{r Log Regression}
+model1 <- glm(yesno ~ ., data = spam, family = "binomial")
+summary(model1) 
+```
+
+It looks like our model was successful. Let's try to test out plotting the model as well, although a binary outcome probably doesn't create the best visualization.
+
+```{r Log Regression Plot}
+ggplot(spam3, 
+       aes(x = value, y = yesno, color = variable)) + 
+  geom_point() + 
+  geom_smooth(method = glm, method.args = list(family = "binomial")) + 
+  labs(title = "Log Plot", 
+       x = "Values", 
+       y = "Spam / Not Spam")
+```
