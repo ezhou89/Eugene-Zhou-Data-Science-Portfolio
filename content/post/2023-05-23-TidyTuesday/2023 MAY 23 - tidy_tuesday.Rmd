@@ -1,7 +1,7 @@
 ---
 title: "2023 MAY 23 - Squirrels in Central Park"
 date: 2023-05-23
-output: html_document
+output: md_document
 ---
 
 ```{r setup, include=FALSE}

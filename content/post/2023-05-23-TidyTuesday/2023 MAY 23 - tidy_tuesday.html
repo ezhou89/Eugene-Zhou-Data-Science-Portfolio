@@ -1,0 +1,670 @@
+
+
+<hr />
+<p>The goal of this work is to apply my understanding of data towards real world projects using R and the tidyverse. The data used here is from the TidyTuesday project.</p>
+<div id="check-out-this-weeks-data" class="section level2">
+<h2>Check Out This Week’s Data</h2>
+<pre class="r"><code># load R packages for analysis
+library(tidyverse)
+library(tidytuesdayR)</code></pre>
+<pre class="r"><code># Download the weekly data and make available in the tt object.
+# Using the last_tuesday function gives us the latest TidyTuesday data from today&#39;s date
+
+tues &lt;- last_tuesday(&quot;2023-5-23&quot;)
+
+tt &lt;- tt_load(tues)</code></pre>
+<pre><code>## 
+## 	Downloading file 1 of 1: `squirrel_data.csv`</code></pre>
+<pre class="r"><code># Check out the available data
+tt</code></pre>
+<p>The data this week comes from the <a href="https://data.cityofnewyork.us/Environment/2018-Central-Park-Squirrel-Census-Squirrel-Data/vfnx-vebw">2018 Central Park Squirrel Census</a>. <a href="https://www.thesquirrelcensus.com/">The Squirrel Census</a> is a multimedia science, design, and storytelling project focusing on the Eastern gray (Sciurus carolinensis). They count squirrels and present their findings to the public. The dataset contains squirrel data for each of the 3,023 sightings, including location coordinates, age, primary and secondary fur color, elevation, activities, communications, and interactions between squirrels and with humans.<br />
+<br />
+<br />
+The following are the included variables:</p>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Variable</strong></th>
+<th><strong>Class</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>X</td>
+<td>double</td>
+<td>Longitude coordinate for squirrel sighting point</td>
+</tr>
+<tr class="even">
+<td>Y</td>
+<td>double</td>
+<td>Latitude coordinate for squirrel sighting point</td>
+</tr>
+<tr class="odd">
+<td>Unique Squirrel ID</td>
+<td>character</td>
+<td>Identification tag for each squirrel sightings. The tag is comprised of <code>Hectare ID</code> + <code>Shift</code> + <code>Date</code> + <code>Hectare Squirrel Number.</code></td>
+</tr>
+<tr class="even">
+<td>Hectare</td>
+<td>character</td>
+<td>ID tag, which is derived from the hectare grid used to divide and count the park area. One axis that runs predominantly north-to-south is numerical (1-42), and the axis that runs predominantly east-to-west is roman characters (A-I).</td>
+</tr>
+<tr class="odd">
+<td>Shift</td>
+<td>character</td>
+<td>Value is either <code>AM</code> or <code>PM,</code> to communicate whether or not the sighting session occurred in the morning or late afternoon.</td>
+</tr>
+<tr class="even">
+<td>Date</td>
+<td>double</td>
+<td>Concatenation of the sighting session day and month.</td>
+</tr>
+<tr class="odd">
+<td>Hectare Squirrel Number</td>
+<td>double</td>
+<td>Number within the chronological sequence of squirrel sightings for a discrete sighting session.</td>
+</tr>
+<tr class="even">
+<td>Age</td>
+<td>character</td>
+<td>Value is either <code>Adult</code> or <code>Juvenile.</code></td>
+</tr>
+<tr class="odd">
+<td>Primary Fur Color</td>
+<td>character</td>
+<td>Primary Fur Color - value is either <code>Gray</code>, <code>Cinnamon</code> or <code>Black</code>.</td>
+</tr>
+<tr class="even">
+<td>Highlight Fur Color</td>
+<td>character</td>
+<td>Discrete value or string values comprised of <code>Gray</code>, <code>Cinnamon</code> or <code>Black</code>.</td>
+</tr>
+<tr class="odd">
+<td>Combination of Primary and Highlight Color</td>
+<td>character</td>
+<td>A combination of the previous two columns; this column gives the total permutations of primary and highlight colors observed.</td>
+</tr>
+<tr class="even">
+<td>Color notes</td>
+<td>character</td>
+<td>Sighters occasionally added commentary on the squirrel fur conditions. These notes are provided here.</td>
+</tr>
+<tr class="odd">
+<td>Location</td>
+<td>character</td>
+<td>Value is either <code>Ground Plane</code> or <code>Above Ground</code>. Sighters were instructed to indicate the location of where the squirrel was when first sighted.</td>
+</tr>
+<tr class="even">
+<td>Above Ground Sighter Measurement</td>
+<td>character</td>
+<td>For squirrel sightings on the ground plane, fields were populated with a value of <code>FALSE</code>.</td>
+</tr>
+<tr class="odd">
+<td>Specific Location</td>
+<td>character</td>
+<td>Sighters occasionally added commentary on the squirrel location. These notes are provided here.</td>
+</tr>
+<tr class="even">
+<td>Running</td>
+<td>logical</td>
+<td>Squirrel was seen running.</td>
+</tr>
+<tr class="odd">
+<td>Chasing</td>
+<td>logical</td>
+<td>Squirrel was seen chasing another squirrel.</td>
+</tr>
+<tr class="even">
+<td>Climbing</td>
+<td>logical</td>
+<td>Squirrel was seen climbing a tree or other environmental landmark.</td>
+</tr>
+<tr class="odd">
+<td>Eating</td>
+<td>logical</td>
+<td>Squirrel was seen eating.</td>
+</tr>
+<tr class="even">
+<td>Foraging</td>
+<td>logical</td>
+<td>Squirrel was seen foraging for food.</td>
+</tr>
+<tr class="odd">
+<td>Other Activities</td>
+<td>character</td>
+<td>Other activities squirrels were observed doing.</td>
+</tr>
+<tr class="even">
+<td>Kuks</td>
+<td>logical</td>
+<td>Squirrel was heard kukking, a chirpy vocal communication used for a variety of reasons.</td>
+</tr>
+<tr class="odd">
+<td>Quaas</td>
+<td>logical</td>
+<td>Squirrel was heard quaaing, an elongated vocal communication which can indicate the presence of a ground predator such as a dog.</td>
+</tr>
+<tr class="even">
+<td>Moans</td>
+<td>logical</td>
+<td>Squirrel was heard moaning, a high-pitched vocal communication which can indicate the presence of an air predator such as a hawk.</td>
+</tr>
+<tr class="odd">
+<td>Tail flags</td>
+<td>logical</td>
+<td>Squirrel was seen flagging its tail. Flagging is a whipping motion used to exaggerate squirrel’s size and confuse rivals or predators. Looks as if the squirrel is scribbling with tail into the air.</td>
+</tr>
+<tr class="even">
+<td>Tail twitches</td>
+<td>logical</td>
+<td>Squirrel was seen twitching its tail. Looks like a wave running through the tail, like a breakdancer doing the arm wave. Often used to communicate interest, curiosity.</td>
+</tr>
+<tr class="odd">
+<td>Approaches</td>
+<td>logical</td>
+<td>Squirrel was seen approaching human, seeking food.</td>
+</tr>
+<tr class="even">
+<td>Indifferent</td>
+<td>logical</td>
+<td>Squirrel was indifferent to human presence.</td>
+</tr>
+<tr class="odd">
+<td>Runs from</td>
+<td>logical</td>
+<td>Squirrel was seen running from humans, seeing them as a threat.</td>
+</tr>
+<tr class="even">
+<td>Other Interactions</td>
+<td>character</td>
+<td>Sighter notes on other types of interactions between squirrels and humans.</td>
+</tr>
+<tr class="odd">
+<td>Lat/Long</td>
+<td>character</td>
+<td>Latitude and longitude</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="initial-thoughts-and-questions" class="section level2">
+<h2>Initial Thoughts and Questions</h2>
+<p>Based on the variables provided, there are likely a few interesting relationships to explore with regards to the 3,023 recorded squirrel sightings, including <code>location</code>, <code>date</code>, <code>activity</code>, and <code>shift</code>.</p>
+<ul>
+<li><p>Are more squirrels observed during the AM or PM?</p></li>
+<li><p>What kind of activities are the squirrels engaging in?</p></li>
+</ul>
+</div>
+<div id="data-wrangling-and-exploratory-data-analysis" class="section level2">
+<h2>Data Wrangling and Exploratory Data Analysis</h2>
+<p>Let’s create a series of smaller data frames to explore whether these variables have some sort of relationship that we can further explore</p>
+<pre class="r"><code># Extract squirrel data from tt 
+squirrel &lt;- tt$squirrel_data
+
+squirrel %&gt;% skimr::skim()</code></pre>
+<table>
+<caption><span id="tab:Extract">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">Piped data</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">3023</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">31</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">14</td>
+</tr>
+<tr class="odd">
+<td align="left">logical</td>
+<td align="left">13</td>
+</tr>
+<tr class="even">
+<td align="left">numeric</td>
+<td align="left">4</td>
+</tr>
+<tr class="odd">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<colgroup>
+<col width="42%" />
+<col width="9%" />
+<col width="13%" />
+<col width="3%" />
+<col width="3%" />
+<col width="5%" />
+<col width="8%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Unique Squirrel ID</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">13</td>
+<td align="right">14</td>
+<td align="right">0</td>
+<td align="right">3018</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Hectare</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">339</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Shift</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Age</td>
+<td align="right">121</td>
+<td align="right">0.96</td>
+<td align="right">1</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Primary Fur Color</td>
+<td align="right">55</td>
+<td align="right">0.98</td>
+<td align="right">4</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Highlight Fur Color</td>
+<td align="right">1086</td>
+<td align="right">0.64</td>
+<td align="right">4</td>
+<td align="right">22</td>
+<td align="right">0</td>
+<td align="right">10</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Combination of Primary and Highlight Color</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">1</td>
+<td align="right">27</td>
+<td align="right">0</td>
+<td align="right">22</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Color notes</td>
+<td align="right">2841</td>
+<td align="right">0.06</td>
+<td align="right">3</td>
+<td align="right">153</td>
+<td align="right">0</td>
+<td align="right">135</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Location</td>
+<td align="right">64</td>
+<td align="right">0.98</td>
+<td align="right">12</td>
+<td align="right">12</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Above Ground Sighter Measurement</td>
+<td align="right">114</td>
+<td align="right">0.96</td>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">41</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Specific Location</td>
+<td align="right">2547</td>
+<td align="right">0.16</td>
+<td align="right">4</td>
+<td align="right">102</td>
+<td align="right">0</td>
+<td align="right">304</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Other Activities</td>
+<td align="right">2586</td>
+<td align="right">0.14</td>
+<td align="right">4</td>
+<td align="right">132</td>
+<td align="right">0</td>
+<td align="right">307</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Other Interactions</td>
+<td align="right">2783</td>
+<td align="right">0.08</td>
+<td align="right">2</td>
+<td align="right">106</td>
+<td align="right">0</td>
+<td align="right">197</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Lat/Long</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">38</td>
+<td align="right">45</td>
+<td align="right">0</td>
+<td align="right">3023</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: logical</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="left">count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Running</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.24</td>
+<td align="left">FAL: 2293, TRU: 730</td>
+</tr>
+<tr class="even">
+<td align="left">Chasing</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.09</td>
+<td align="left">FAL: 2744, TRU: 279</td>
+</tr>
+<tr class="odd">
+<td align="left">Climbing</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.22</td>
+<td align="left">FAL: 2365, TRU: 658</td>
+</tr>
+<tr class="even">
+<td align="left">Eating</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.25</td>
+<td align="left">FAL: 2263, TRU: 760</td>
+</tr>
+<tr class="odd">
+<td align="left">Foraging</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.47</td>
+<td align="left">FAL: 1588, TRU: 1435</td>
+</tr>
+<tr class="even">
+<td align="left">Kuks</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.03</td>
+<td align="left">FAL: 2921, TRU: 102</td>
+</tr>
+<tr class="odd">
+<td align="left">Quaas</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.02</td>
+<td align="left">FAL: 2973, TRU: 50</td>
+</tr>
+<tr class="even">
+<td align="left">Moans</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.00</td>
+<td align="left">FAL: 3020, TRU: 3</td>
+</tr>
+<tr class="odd">
+<td align="left">Tail flags</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.05</td>
+<td align="left">FAL: 2868, TRU: 155</td>
+</tr>
+<tr class="even">
+<td align="left">Tail twitches</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.14</td>
+<td align="left">FAL: 2589, TRU: 434</td>
+</tr>
+<tr class="odd">
+<td align="left">Approaches</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.06</td>
+<td align="left">FAL: 2845, TRU: 178</td>
+</tr>
+<tr class="even">
+<td align="left">Indifferent</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.48</td>
+<td align="left">FAL: 1569, TRU: 1454</td>
+</tr>
+<tr class="odd">
+<td align="left">Runs from</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.22</td>
+<td align="left">FAL: 2345, TRU: 678</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<colgroup>
+<col width="17%" />
+<col width="7%" />
+<col width="10%" />
+<col width="8%" />
+<col width="6%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">X</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">-73.97</td>
+<td align="right">0.01</td>
+<td align="right">-73.98</td>
+<td align="right">-73.97</td>
+<td align="right">-73.97</td>
+<td align="right">-73.96</td>
+<td align="right">-73.95</td>
+<td align="left">▅▇▅▆▂</td>
+</tr>
+<tr class="even">
+<td align="left">Y</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">40.78</td>
+<td align="right">0.01</td>
+<td align="right">40.76</td>
+<td align="right">40.77</td>
+<td align="right">40.78</td>
+<td align="right">40.79</td>
+<td align="right">40.80</td>
+<td align="left">▇▇▃▅▆</td>
+</tr>
+<tr class="odd">
+<td align="left">Date</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">10119487.40</td>
+<td align="right">42466.71</td>
+<td align="right">10062018.00</td>
+<td align="right">10082018.00</td>
+<td align="right">10122018.00</td>
+<td align="right">10142018.00</td>
+<td align="right">10202018.00</td>
+<td align="left">▇▂▇▂▃</td>
+</tr>
+<tr class="even">
+<td align="left">Hectare Squirrel Number</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4.12</td>
+<td align="right">3.10</td>
+<td align="right">1.00</td>
+<td align="right">2.00</td>
+<td align="right">3.00</td>
+<td align="right">6.00</td>
+<td align="right">23.00</td>
+<td align="left">▇▂▁▁▁</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Create a new data frame to explore observed squirrels depending on time of day and age
+
+df1 &lt;- squirrel %&gt;%
+  select(`Shift`, `Hectare Squirrel Number`, `Age`)
+
+df1 %&gt;% 
+  group_by(Shift, Age) %&gt;%
+  summarise(`# Observed` = n(), 
+            `Min Squirrels per Hectare` = min(`Hectare Squirrel Number`), 
+            `Max Squirrels per Hectare` = max(`Hectare Squirrel Number`), 
+            .groups = &quot;keep&quot;)</code></pre>
+<pre><code>## # A tibble: 8 × 5
+## # Groups:   Shift, Age [8]
+##   Shift Age      `# Observed` `Min Squirrels per Hectare` Max Squirrels per He…¹
+##   &lt;chr&gt; &lt;chr&gt;           &lt;int&gt;                       &lt;dbl&gt;                  &lt;dbl&gt;
+## 1 AM    ?                   2                           3                      5
+## 2 AM    Adult            1152                           1                     23
+## 3 AM    Juvenile          152                           1                     16
+## 4 AM    &lt;NA&gt;               41                           1                     14
+## 5 PM    ?                   2                           2                      5
+## 6 PM    Adult            1416                           1                     17
+## 7 PM    Juvenile          178                           1                     15
+## 8 PM    &lt;NA&gt;               80                           1                      9
+## # ℹ abbreviated name: ¹​`Max Squirrels per Hectare`</code></pre>
+<pre class="r"><code>df1 %&gt;% 
+  group_by(Shift, Age) %&gt;%
+  summarise(`# Observed` = n(), 
+            .groups = &quot;keep&quot;) %&gt;% 
+  ggplot(aes(x = `Shift`, y = `# Observed`, fill = `Age`)) + 
+  geom_col(position = &quot;dodge&quot;) +
+  labs(x = &quot;Shift (AM/PM)&quot;, 
+       y = &quot;# of Squirrels Observed&quot;, 
+       title = &quot;More Squirrels Observed in the PM&quot;)</code></pre>
+<p><img src="/post/2023-05-23-TidyTuesday/2023%20MAY%2023%20-%20tidy_tuesday_files/figure-html/Plot%20DF1-1.png" width="672" /></p>
+<p>Let’s see what happens to the squirrel data frame if we drop the <code>NA</code>’s.</p>
+<pre class="r"><code>df2 &lt;- squirrel %&gt;% 
+  drop_na()</code></pre>
+<p>Only 1 row of data remains, indicating at least one observation is missing in each variable across nearly every single squirrel sighted, suggesting dropping <code>NA</code>’s immediately is not a good choice for our data set.<br />
+</p>
+<pre class="r"><code>df2 &lt;- squirrel %&gt;% 
+  select(Running, Chasing, Climbing, Eating, Foraging) %&gt;%
+  gather(key = &quot;Activity&quot;, value = &quot;Observed&quot;) %&gt;%
+  group_by(Activity) %&gt;%
+  count(Observed)
+
+df2 %&gt;%
+  ggplot(aes(x = Activity, y = n, fill = Observed)) + 
+  geom_col()</code></pre>
+<p><img src="/post/2023-05-23-TidyTuesday/2023%20MAY%2023%20-%20tidy_tuesday_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>It appears that we have so mand <code>NA</code>’s because a squirrel cannot be doing some of these activities simultaneously.<br />
+</p>
+</div>
+<div id="future-work" class="section level2">
+<h2>Future Work</h2>
+<ol style="list-style-type: decimal">
+<li>TBD</li>
+</ol>
+</div>
