@@ -1,0 +1,467 @@
+
+
+<hr />
+<p>The goal of this work is to apply my understanding of data towards real world projects using R and the tidyverse. The data used here is from the TidyTuesday project.</p>
+<div id="check-out-this-weeks-data" class="section level2">
+<h2>Check Out This Week’s Data</h2>
+<pre class="r"><code># load R packages for analysis
+library(tidyverse)
+library(tidytuesdayR)</code></pre>
+<pre class="r"><code># Download the weekly data and make available in the tt object.
+# Using the last_tuesday function gives us the latest TidyTuesday data from today&#39;s date
+
+tues &lt;- last_tuesday(&quot;2023-5-30&quot;)
+
+tt &lt;- tt_load(tues)</code></pre>
+<pre><code>## 
+## 	Downloading file 1 of 1: `centenarians.csv`</code></pre>
+<pre class="r"><code># Check out the available data
+tt</code></pre>
+<p>The data this week comes from the <a href="https://en.wikipedia.org/wiki/List_of_the_verified_oldest_people">Wikipedia List of the verified oldest people</a> via <a href="https://github.com/frankiethull/centenarians">frankiethull on GitHub</a>. These are lists of the 100 known verified oldest people sorted in descending order by age in years and days. The oldest person ever whose age has been independently verified is Jeanne Calment (1875–1997) of France, who lived to the age of 122 years and 164 days. The oldest verified man ever is Jiroemon Kimura (1897–2013) of Japan, who lived to the age of 116 years and 54 days. The oldest known living person is Maria Branyas of Spain, aged 116 years, 85 days. The oldest known living man is Juan Vicente Pérez of Venezuela, aged 114 years, 1 day. The 100 oldest women have, on average, lived several years longer than the 100 oldest men.</p>
+<div id="the-following-are-the-included-variables" class="section level3">
+<h3>The following are the included variables:</h3>
+<table>
+<colgroup>
+<col width="27%" />
+<col width="24%" />
+<col width="47%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Variable</strong></th>
+<th><strong>Class</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>rank</td>
+<td>integer</td>
+<td>This person’s overall rank by age.</td>
+</tr>
+<tr class="even">
+<td>name</td>
+<td>character</td>
+<td>The full name of this person.</td>
+</tr>
+<tr class="odd">
+<td>birth_date</td>
+<td>date</td>
+<td>This person’s birth date.</td>
+</tr>
+<tr class="even">
+<td>death_date</td>
+<td>date</td>
+<td>This person’s death date (or NA if still alive).</td>
+</tr>
+<tr class="odd">
+<td>age</td>
+<td>double</td>
+<td>The person’s age, either on the day of their death or on the day when the dataset was extracted on 2023-05-25.</td>
+</tr>
+<tr class="even">
+<td>place_of_death_or_residence</td>
+<td>character</td>
+<td>Where the person lives now or where they were when they died.</td>
+</tr>
+<tr class="odd">
+<td>gender</td>
+<td>character</td>
+<td>Most likely actually the sex assigned to the person at birth (the source article does not specify).</td>
+</tr>
+<tr class="even">
+<td>still_alive</td>
+<td>character</td>
+<td>Either “alive” if the person was still alive at the time when the article as referenced, or “deceased” if the person was no longer alive.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="initial-thoughts-and-questions" class="section level2">
+<h2>Initial Thoughts and Questions</h2>
+<p>Based on the variables provided, the most obvious question to ask would be:</p>
+<ul>
+<li><p>Do the oldest individuals on the planet were living in the same general location or country?</p></li>
+<li><p>Who tends to live longer? Men or Women?</p></li>
+</ul>
+<p>From what I’ve previously heard regarding age statistics, Japan tends to have the longest life expectancy and women tend to live longer than men, so let’s explore if that’s still the case.</p>
+</div>
+<div id="data-wrangling-and-exploratory-data-analysis" class="section level2">
+<h2>Data Wrangling and Exploratory Data Analysis</h2>
+<p>Let’s create a series of smaller data frames to explore whether these variables have some sort of relationship that we can further explore</p>
+<pre class="r"><code># Extract data from tt 
+cent &lt;- tt$centenarians
+
+cent %&gt;% skimr::skim()</code></pre>
+<table>
+<caption><span id="tab:Extract">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">Piped data</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">200</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">8</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">4</td>
+</tr>
+<tr class="odd">
+<td align="left">Date</td>
+<td align="left">2</td>
+</tr>
+<tr class="even">
+<td align="left">numeric</td>
+<td align="left">2</td>
+</tr>
+<tr class="odd">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col width="32%" />
+<col width="11%" />
+<col width="16%" />
+<col width="4%" />
+<col width="4%" />
+<col width="6%" />
+<col width="10%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">name</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">9</td>
+<td align="right">31</td>
+<td align="right">0</td>
+<td align="right">200</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">place_of_death_or_residence</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">25</td>
+<td align="right">0</td>
+<td align="right">34</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">gender</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">6</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">still_alive</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: Date</strong></p>
+<table>
+<colgroup>
+<col width="17%" />
+<col width="12%" />
+<col width="17%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="left">min</th>
+<th align="left">max</th>
+<th align="left">median</th>
+<th align="right">n_unique</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">birth_date</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="left">1856-06-15</td>
+<td align="left">1911-12-05</td>
+<td align="left">1900-05-23</td>
+<td align="right">199</td>
+</tr>
+<tr class="even">
+<td align="left">death_date</td>
+<td align="right">12</td>
+<td align="right">0.94</td>
+<td align="left">1968-03-21</td>
+<td align="left">2023-04-17</td>
+<td align="left">2014-01-02</td>
+<td align="right">186</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<colgroup>
+<col width="15%" />
+<col width="10%" />
+<col width="15%" />
+<col width="7%" />
+<col width="6%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">rank</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">50.44</td>
+<td align="right">28.90</td>
+<td align="right">1.00</td>
+<td align="right">25.75</td>
+<td align="right">50.50</td>
+<td align="right">75.25</td>
+<td align="right">100.00</td>
+<td align="left">▇▇▇▇▇</td>
+</tr>
+<tr class="even">
+<td align="left">age</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">114.06</td>
+<td align="right">1.93</td>
+<td align="right">111.46</td>
+<td align="right">112.26</td>
+<td align="right">114.57</td>
+<td align="right">115.29</td>
+<td align="right">122.45</td>
+<td align="left">▇▇▂▁▁</td>
+</tr>
+</tbody>
+</table>
+<p>Luckily for us, the only variable that has missing data is <code>death_date</code>, because 12 of these individuals are currently alive. All other data is complete, making this a relatively straight forward and small set of data with 200 observations.</p>
+<p>Let’s first tackle the question of which gender tends to live longer through a quick summary.</p>
+<pre class="r"><code># Group data by gender and count via summarize
+
+cent %&gt;%
+  group_by(gender) %&gt;%
+  summarise(n())</code></pre>
+<pre><code>## # A tibble: 2 × 2
+##   gender `n()`
+##   &lt;chr&gt;  &lt;int&gt;
+## 1 female   100
+## 2 male     100</code></pre>
+<p>We see this data set collected 100 from each gender, suggesting we may not be able to determine which gender lives longer. However, we should be able to determine how much longer, on average, one gender lives compared to the other.</p>
+<pre class="r"><code>cent %&gt;%
+  group_by(gender) %&gt;%
+  summarise(mean(age))</code></pre>
+<pre><code>## # A tibble: 2 × 2
+##   gender `mean(age)`
+##   &lt;chr&gt;        &lt;dbl&gt;
+## 1 female        116.
+## 2 male          113.</code></pre>
+<p>We see that the longest living women, on average, are still outliving the longest living men by 3.1 years.</p>
+<p>Next let’s see if we can determine which countries have the most long-lived individuals.</p>
+<pre class="r"><code># Create a new data frame to explore which countries have the highest number of individuals
+
+df1 &lt;- cent %&gt;%
+  group_by(place_of_death_or_residence) %&gt;%
+  summarise(`No. of Individuals` = n(), 
+            `Avg Age` = mean(age),
+            `Shortest` = min(age),  
+            `Longest` = max(age)) 
+
+df1 %&gt;% 
+  arrange(desc(`No. of Individuals`))</code></pre>
+<pre><code>## # A tibble: 34 × 5
+##    place_of_death_or_residence `No. of Individuals` `Avg Age` Shortest Longest
+##    &lt;chr&gt;                                      &lt;int&gt;     &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;
+##  1 United States                                 66      114.     111.    119.
+##  2 Japan                                         46      114.     111.    119.
+##  3 France                                         9      115.     112.    122.
+##  4 Italy                                          9      114.     112.    117.
+##  5 Spain                                          9      114.     112.    116.
+##  6 United Kingdom                                 9      114.     112.    116.
+##  7 Brazil                                         6      115.     113.    117.
+##  8 Canada                                         5      115.     111.    118.
+##  9 Portugal                                       5      113.     111.    115.
+## 10 Mexico                                         4      113.     111.    113.
+## # ℹ 24 more rows</code></pre>
+<p>Oddly enough, it looks like the US has the greatest number of centenarians. How does that compare against the countries with the longest average lifespan? Which are the top 10 countries?</p>
+<pre class="r"><code>cent %&gt;%
+  group_by(place_of_death_or_residence) %&gt;%
+  summarise(`Avg Age` = mean(age)) %&gt;%
+  transmute(`Country` = place_of_death_or_residence, `Avg Age`) %&gt;%
+  arrange(desc(`Avg Age`)) %&gt;%
+  head(n = 10)</code></pre>
+<pre><code>## # A tibble: 10 × 2
+##    Country                   `Avg Age`
+##    &lt;chr&gt;                         &lt;dbl&gt;
+##  1 Jamaica                        118.
+##  2 Ecuador                        117.
+##  3 Argentina                      115.
+##  4 Brazil                         115.
+##  5 France                         115.
+##  6 Canada                         115.
+##  7 France (French Guiana)         115.
+##  8 Peru                           115.
+##  9 France (Saint Barthélemy)      115.
+## 10 Cuba                           115.</code></pre>
+<p>According to the data, Jamaica has the highest average lifespan, which is unheard of from conventional knowledge. How is this possible? Let’s double check how many individuals from these top countries are actually on this list.</p>
+<pre class="r"><code>cent %&gt;%
+  group_by(place_of_death_or_residence) %&gt;%
+  summarise(`Avg Age` = mean(age), 
+            `No. of Individuals` = n()) %&gt;%
+  transmute(`Country` = place_of_death_or_residence, `Avg Age`, `No. of Individuals`) %&gt;%
+  arrange(desc(`Avg Age`)) %&gt;%
+  head(n = 10)</code></pre>
+<pre><code>## # A tibble: 10 × 3
+##    Country                   `Avg Age` `No. of Individuals`
+##    &lt;chr&gt;                         &lt;dbl&gt;                &lt;int&gt;
+##  1 Jamaica                        118.                    1
+##  2 Ecuador                        117.                    1
+##  3 Argentina                      115.                    1
+##  4 Brazil                         115.                    6
+##  5 France                         115.                    9
+##  6 Canada                         115.                    5
+##  7 France (French Guiana)         115.                    1
+##  8 Peru                           115.                    1
+##  9 France (Saint Barthélemy)      115.                    1
+## 10 Cuba                           115.                    1</code></pre>
+<p>Looks like these n of 1 data points are acting more like outliers to drive up the average age. What if we filter out the countries that only have 1 individual?</p>
+<pre class="r"><code>cent %&gt;%
+  group_by(place_of_death_or_residence) %&gt;%
+  summarise(`Avg Age` = mean(age), 
+            `No. of Individuals` = n()) %&gt;%
+  filter(`No. of Individuals` &gt; 1) %&gt;%
+  transmute(`Country` = place_of_death_or_residence, `Avg Age`, `No. of Individuals`) %&gt;%
+  arrange(desc(`Avg Age`)) %&gt;%
+  head(n = 10)</code></pre>
+<pre><code>## # A tibble: 10 × 3
+##    Country        `Avg Age` `No. of Individuals`
+##    &lt;chr&gt;              &lt;dbl&gt;                &lt;int&gt;
+##  1 Brazil              115.                    6
+##  2 France              115.                    9
+##  3 Canada              115.                    5
+##  4 Puerto Rico         114.                    3
+##  5 Italy               114.                    9
+##  6 Japan               114.                   46
+##  7 United States       114.                   66
+##  8 Poland              114.                    2
+##  9 United Kingdom      114.                    9
+## 10 Colombia            114.                    3</code></pre>
+<p>It’s still very surprising to see that Brazil is now at the top of the list, as ranked by the average oldest recorded lifespans in descending order. However, we now see that Japan and the US is now included in the top 10, with Japan ranking higher than the US, as expected.</p>
+<p>Let’s create a visualization that’s essentially a heat map in the world map. To do so, we need to create a new data frame that contains the coordinates of the world map in addition to our centenarian data.</p>
+<pre class="r"><code># Load up the world map coordinates
+library(maps)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;maps&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     map</code></pre>
+<pre class="r"><code>world_map &lt;- map_data(&quot;world&quot;)
+
+# Replace United States with USA to join the data sets
+cent$place_of_death_or_residence[cent$place_of_death_or_residence == &quot;United States&quot;] &lt;- &quot;USA&quot;
+
+# Merge centanarian data with world coordinates into a new data frame
+df2 &lt;- cent %&gt;%
+  group_by(place_of_death_or_residence) %&gt;%
+  summarise(`Avg Age` = mean(age), 
+            `No. of Individuals` = n()) %&gt;%
+  transmute(`Country` = place_of_death_or_residence, `Avg Age`, `No. of Individuals`) %&gt;%
+  full_join(world_map, join_by(&quot;Country&quot; == &quot;region&quot;))</code></pre>
+<p>Now we can visualize.</p>
+<pre class="r"><code>ggplot(df2) +
+  geom_map(
+    dat = world_map, map = world_map, aes(map_id = region),
+    fill = &quot;white&quot;, color = &quot;black&quot;, size = 0.25
+  ) +
+  geom_map(map = world_map, aes(map_id = Country, fill = `No. of Individuals`), size = 0.25) +
+  scale_fill_gradient2(low = &quot;white&quot;, high = &quot;red&quot;, na.value = &quot;white&quot;, name = &quot;# of People&quot;) +
+  expand_limits(x = world_map$long, y = world_map$lat) + 
+  labs(title = &quot;Countries with the Most Centenarians&quot;, 
+       y = &quot;Latitude&quot;, 
+       x = &quot;Longitude&quot;)</code></pre>
+<pre><code>## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.</code></pre>
+<p><img src="/post/2023-05-30-TidyTuesday/2023%20MAY%2030%20-%20tidy_tuesday_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+</div>
+<div id="future-work" class="section level2">
+<h2>Future Work</h2>
+<ol style="list-style-type: decimal">
+<li>TBD</li>
+</ol>
+</div>
