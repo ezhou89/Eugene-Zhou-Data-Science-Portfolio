@@ -1,6 +1,6 @@
 ---
 title: "Practicing BigQuery, SQL, and R"
-date: 2023-08-15
+date: 2023-08-14
 output: html_document
 editor_options:
   chunk_output_type: inline
