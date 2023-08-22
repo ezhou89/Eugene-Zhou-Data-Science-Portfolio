@@ -1,0 +1,230 @@
+
+
+<p>The goal of this work is to apply my understanding of data towards real world projects using R and the tidyverse. The data used here is from the TidyTuesday project.</p>
+<div id="check-out-this-weeks-data" class="section level2">
+<h2>Check Out This Week’s Data</h2>
+<pre class="r"><code># load R packages for analysis
+library(tidyverse)
+library(tidytuesdayR)</code></pre>
+<pre class="r"><code># Download the weekly data and make available in the tt object.
+# Using the last_tuesday function gives us the latest TidyTuesday data from today&#39;s date
+
+tt &lt;- tt_load(last_tuesday())</code></pre>
+<pre><code>## 
+## 	Downloading file 1 of 1: `population.csv`</code></pre>
+<pre class="r"><code># Check out the available data
+tt</code></pre>
+<p>The data this week comes from PopulationStatistics {refugees} R package.</p>
+<blockquote>
+<p>{refugees} is an R package designed to facilitate access to the United Nations High Commissioner for Refugees (UNHCR) Refugee Data Finder. It provides an easy-to-use interface to the database, which covers forcibly displaced populations, including refugees, asylum-seekers, internally displaced people, stateless people, and others over a span of more than 70 years.</p>
+</blockquote>
+<p>This package provides data from three major sources:</p>
+<ul>
+<li><p>Data from UNHCR’s annual statistical activities dating back to 1951.</p></li>
+<li><p>Data from the United Nations Relief and Works Agency for Palestine Refugees in the Near East (UNRWA), specifically for registered Palestine refugees under UNRWA’s mandate.</p></li>
+<li><p>Data from the Internal Displacement Monitoring Centre (IDMC) on people displaced within their country due to conflict or violence.</p></li>
+</ul>
+<p>The {refugees} package includes eight datasets. We’re working with <code>population</code> with data from 2010 to 2022.</p>
+<div id="the-following-are-the-included-variables" class="section level3">
+<h3>The following are the included variables:</h3>
+<table>
+<caption>Look’s like we should different country of origin (COO) and country of asylum (COA). Let’s extract the population data set from our <code>tt</code> list.</caption>
+<colgroup>
+<col width="23%" />
+<col width="23%" />
+<col width="52%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Variable</strong></th>
+<th><strong>Class</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>year</td>
+<td>double</td>
+<td>The year.</td>
+</tr>
+<tr class="even">
+<td>coo_name</td>
+<td>character</td>
+<td>Country of origin name.</td>
+</tr>
+<tr class="odd">
+<td>coo</td>
+<td>character</td>
+<td>Country of origin UNHCR code.</td>
+</tr>
+<tr class="even">
+<td>coo_iso</td>
+<td>character</td>
+<td>Country of origin ISO code.</td>
+</tr>
+<tr class="odd">
+<td>coa_name</td>
+<td>character</td>
+<td>Country of asylum name.</td>
+</tr>
+<tr class="even">
+<td>coa</td>
+<td>character</td>
+<td>Country of asylum UNHCR code.</td>
+</tr>
+<tr class="odd">
+<td>coa_iso</td>
+<td>character</td>
+<td>Country of asylum ISO code.</td>
+</tr>
+<tr class="even">
+<td>refugees</td>
+<td>double</td>
+<td>The number of refugees.</td>
+</tr>
+<tr class="odd">
+<td>asylum_seekers</td>
+<td>double</td>
+<td>The number of asylum-seekers.</td>
+</tr>
+<tr class="even">
+<td>returned_refugees</td>
+<td>double</td>
+<td>The number of returned refugees.</td>
+</tr>
+<tr class="odd">
+<td>idps</td>
+<td>double</td>
+<td>The number of internally displaced persons.</td>
+</tr>
+<tr class="even">
+<td>returned_idps</td>
+<td>double</td>
+<td>The number of returned internally displaced persons.</td>
+</tr>
+<tr class="odd">
+<td>stateless</td>
+<td>double</td>
+<td>The number of stateless persons.</td>
+</tr>
+<tr class="even">
+<td>ooc</td>
+<td>double</td>
+<td>The number of others of concern to UNHCR.</td>
+</tr>
+<tr class="odd">
+<td>oip</td>
+<td>double</td>
+<td>The number of other people in need of international protection.</td>
+</tr>
+<tr class="even">
+<td>hst</td>
+<td>double</td>
+<td>The number of host community members.</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>ref_pop &lt;- tt$population
+
+# how does the data look?
+ref_pop %&gt;% glimpse()</code></pre>
+<pre><code>## Rows: 64,809
+## Columns: 16
+## $ year              &lt;dbl&gt; 2010, 2010, 2010, 2010, 2010, 2010, 2010, 2010, 2010…
+## $ coo_name          &lt;chr&gt; &quot;Afghanistan&quot;, &quot;Iran (Islamic Rep. of)&quot;, &quot;Iraq&quot;, &quot;Pa…
+## $ coo               &lt;chr&gt; &quot;AFG&quot;, &quot;IRN&quot;, &quot;IRQ&quot;, &quot;PAK&quot;, &quot;ARE&quot;, &quot;CHI&quot;, &quot;GAZ&quot;, &quot;IR…
+## $ coo_iso           &lt;chr&gt; &quot;AFG&quot;, &quot;IRN&quot;, &quot;IRQ&quot;, &quot;PAK&quot;, &quot;EGY&quot;, &quot;CHN&quot;, &quot;PSE&quot;, &quot;IR…
+## $ coa_name          &lt;chr&gt; &quot;Afghanistan&quot;, &quot;Afghanistan&quot;, &quot;Afghanistan&quot;, &quot;Afghan…
+## $ coa               &lt;chr&gt; &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;ALB&quot;, &quot;ALB&quot;, &quot;ALB&quot;, &quot;AL…
+## $ coa_iso           &lt;chr&gt; &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;AFG&quot;, &quot;ALB&quot;, &quot;ALB&quot;, &quot;ALB&quot;, &quot;AL…
+## $ refugees          &lt;dbl&gt; 0, 30, 6, 6398, 5, 6, 5, 5, 49, 5, 5, 0, 0, 6, 6, 66…
+## $ asylum_seekers    &lt;dbl&gt; 0, 21, 0, 9, 0, 0, 0, 0, 20, 0, 0, 5, 10, 92, 5, 26,…
+## $ returned_refugees &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ idps              &lt;dbl&gt; 351907, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ returned_idps     &lt;dbl&gt; 3366, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ stateless         &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ ooc               &lt;dbl&gt; 838250, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+## $ oip               &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+## $ hst               &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …</code></pre>
+</div>
+</div>
+<div id="questions" class="section level2">
+<h2>Questions:</h2>
+<ol style="list-style-type: decimal">
+<li>Which country has the most refugees fleeing the country?</li>
+</ol>
+</div>
+<div id="data-cleaning" class="section level2">
+<h2>Data Cleaning:</h2>
+<p>Let’s stick with ISO codes only.</p>
+<pre class="r"><code># use select to remove the UNHCR-coded fields
+df &lt;- ref_pop %&gt;%
+  select(-coo, -coa,)</code></pre>
+</div>
+<div id="exploratory-data-analysis" class="section level2">
+<h2>Exploratory Data Analysis</h2>
+<p>This section was originally confusing and I thought I was using the <code>group_by</code> and <code>summarise</code> functions wrong, but it looks like we have a collection of refugees from an <strong>origin</strong> country to <strong>asylum</strong> countries each year.</p>
+<pre class="r"><code>df %&gt;%
+  group_by(coo_name, coo_iso, coa_name, coa_iso) %&gt;%
+  summarise(year, refugees)</code></pre>
+<pre><code>## Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
+## dplyr 1.1.0.
+## ℹ Please use `reframe()` instead.
+## ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
+##   always returns an ungrouped data frame and adjust accordingly.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;coo_name&#39;, &#39;coo_iso&#39;, &#39;coa_name&#39;,
+## &#39;coa_iso&#39;. You can override using the `.groups` argument.</code></pre>
+<pre><code>## # A tibble: 64,809 × 6
+## # Groups:   coo_name, coo_iso, coa_name, coa_iso [7,710]
+##    coo_name    coo_iso coa_name    coa_iso  year refugees
+##    &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;       &lt;chr&gt;   &lt;dbl&gt;    &lt;dbl&gt;
+##  1 Afghanistan AFG     Afghanistan AFG      2010        0
+##  2 Afghanistan AFG     Afghanistan AFG      2011        0
+##  3 Afghanistan AFG     Afghanistan AFG      2012        0
+##  4 Afghanistan AFG     Afghanistan AFG      2013        0
+##  5 Afghanistan AFG     Afghanistan AFG      2014        0
+##  6 Afghanistan AFG     Afghanistan AFG      2015        0
+##  7 Afghanistan AFG     Afghanistan AFG      2016        0
+##  8 Afghanistan AFG     Afghanistan AFG      2017        0
+##  9 Afghanistan AFG     Afghanistan AFG      2018        0
+## 10 Afghanistan AFG     Afghanistan AFG      2019        0
+## # ℹ 64,799 more rows</code></pre>
+<p>Let’s try making this data a little easier to work with by summing the refugees in each year first.</p>
+<pre class="r"><code>df2 &lt;- df %&gt;%
+  group_by(year, coo_name, coo_iso) %&gt;%
+  summarise(coo_refugees = sum(refugees))</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;year&#39;, &#39;coo_name&#39;. You can override using
+## the `.groups` argument.</code></pre>
+<pre class="r"><code># let&#39;s do a quick sanity check 
+df2 %&gt;%
+  arrange(desc(coo_refugees))</code></pre>
+<pre><code>## # A tibble: 2,559 × 4
+## # Groups:   year, coo_name [2,559]
+##     year coo_name         coo_iso coo_refugees
+##    &lt;dbl&gt; &lt;chr&gt;            &lt;chr&gt;          &lt;dbl&gt;
+##  1  2021 Syrian Arab Rep. SYR          6848865
+##  2  2020 Syrian Arab Rep. SYR          6702910
+##  3  2018 Syrian Arab Rep. SYR          6654374
+##  4  2019 Syrian Arab Rep. SYR          6615249
+##  5  2022 Syrian Arab Rep. SYR          6547818
+##  6  2017 Syrian Arab Rep. SYR          6310498
+##  7  2022 Ukraine          UKR          5679880
+##  8  2022 Afghanistan      AFG          5661675
+##  9  2016 Syrian Arab Rep. SYR          5524511
+## 10  2015 Syrian Arab Rep. SYR          4873236
+## # ℹ 2,549 more rows</code></pre>
+<p>This seems unreal. From 2018-2022, there were more than 6.5 million refugees out of Syria each year?</p>
+<pre class="r"><code>df %&gt;%
+  filter(coo_iso == &quot;SYR&quot;) %&gt;%
+  group_by(coa_iso) %&gt;%
+  ggplot() + 
+  aes(x = year, y = refugees, fill = coa_iso) + 
+  geom_col() + 
+  theme(legend.position = &quot;none&quot;) + 
+  labs(title = &quot;Syrian Refugees Per Year&quot;, 
+       x = &quot;Year&quot;, 
+       y = &quot;# of Refugees&quot;)</code></pre>
+<p><img src="/post/2023-08-22 - TidyTuesday/2023%20AUG%2022%20-%20TidyTuesday_Refugees_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
